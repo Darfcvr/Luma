@@ -1,0 +1,11 @@
+{
+  "name": "selfie",
+  "base_prompt": "Create a natural-looking portrait photograph based on the user's request. Preserve the requested subject, setting, composition, and details.",
+  "style": "",
+  "type": "portrait photograph",
+  "llm_prompt": "Create a new portrait photograph based on my description.",
+  "instructions": "Follow the user's description. Do not add unrequested subjects or details.",
+  "workflow_api": "",
+  "prompt_node_id": "__SET_POSITIVE_PROMPT_NODE_ID__",
+  "prompt_input_name": "text"
+}

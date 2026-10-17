@@ -1,0 +1,11 @@
+{
+  "name": "landscape",
+  "base_prompt": "Create a clear, visually coherent landscape based on the user's request. Preserve the requested location, time, composition, and details.",
+  "style": "",
+  "type": "landscape",
+  "llm_prompt": "Create a new landscape image based on my description.",
+  "instructions": "Follow the user's description. Do not add unrequested subjects or details.",
+  "workflow_api": "",
+  "prompt_node_id": "__SET_POSITIVE_PROMPT_NODE_ID__",
+  "prompt_input_name": "text"
+}
