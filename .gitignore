@@ -1,0 +1,36 @@
+# Local credentials and runtime configuration
+config.json
+input.json
+state.json
+.env
+.env.*
+secrets.json
+credentials.json
+*.pem
+*.key
+*.ppk
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Editor and operating system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Runtime data
+generated/
+prompts/
+history/
+archive/
+logs/
+*.log
+dist/
+build/
+
+# Preserve README screenshots under scr/.

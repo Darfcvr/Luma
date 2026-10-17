@@ -1,0 +1,51 @@
+{
+  "llm": {
+    "base_url": "http://127.0.0.1:1234/v1",
+    "api_key": "",
+    "model": "local-model",
+    "timeout": 180,
+    "temperature": 0.9,
+    "top_p": 0.95,
+    "max_tokens": 1400
+  },
+  "comfyui": {
+    "base_url": "http://127.0.0.1:8188",
+    "poll_interval": 1,
+    "timeout": 3600,
+    "output_directory": ""
+  },
+  "telegram": {
+    "enabled": false,
+    "bot_token": "",
+    "chat_id": "",
+    "send_results": false
+  },
+  "llm_lifecycle": {
+    "enabled": false,
+    "host": "",
+    "port": 22,
+    "user": "",
+    "key_path": "~/.ssh/id_ed25519",
+    "password": "",
+    "start_command": "start",
+    "stop_command": "stop",
+    "status_command": "status",
+    "start_timeout": 190,
+    "stop_timeout": 45
+  },
+  "agent": {
+    "continuous": false,
+    "cooldown_seconds": 10,
+    "max_llm_attempts": 4,
+    "save_prompts": true
+  },
+  "paths": {
+    "state": "state.json",
+    "prompts": "prompts",
+    "presets": "presets",
+    "workflows": "workflows"
+  },
+  "ui": {
+    "language": "en"
+  }
+}
