@@ -1,111 +1,98 @@
 # Lumo
 
-Lumo is a desktop app for creating and refining images with a language model and [ComfyUI](https://github.com/comfyanonymous/ComfyUI). Describe an idea in text or by voice, choose a ComfyUI API workflow, and review the generated image in the app. Conversation mode keeps the current image and discussion as context for follow-up edits.
+**Turn an idea into an image. Then keep refining it through conversation.**
 
-The interface is available in English and Polish. English is the default; choose a language from the launcher. The selection is saved in the local configuration.
-
-## Screenshots
-
-### Home and mode selection
-
-Choose between the original preset-based generator and a contextual conversation with the agent.
+Lumo is a desktop interface for AI image generation with [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and an OpenAI-compatible language model. Type a request or speak to the agent, review the result, and ask for changes while keeping the current image and conversation in context.
 
 ![Lumo home screen](scr/2.png)
 
-### Conversation mode
+## At a glance
 
-The generated image is the main workspace. Model and workflow controls, live transcription, conversation history, agent status, and the Krea2 prompt preview are available in the side panel.
+- **Auto generate** — a familiar prompt-and-preset workflow for creating images.
+- **Conversation mode** — ask for an image, then refine it with follow-up requests in the same session.
+- **ComfyUI workflows** — choose an API-format workflow from your own ComfyUI setup.
+- **Voice input** — speak through your microphone; transcription runs locally with faster-whisper.
+- **English and Polish interface** — English is selected by default.
+- **Your setup, your models** — connect a local or hosted OpenAI-compatible LLM and your ComfyUI server.
 
-![Conversation mode](scr/1.png)
+## Screenshots
+
+### Choose a workspace
+
+![Lumo home and mode selection](scr/2.png)
+
+### Continue refining in a conversation
+
+The image preview is the main workspace. Conversation, speech transcript, model and workflow controls, and task progress sit alongside it.
+
+![Lumo conversation mode](scr/1.png)
+
+### Use the preset-based generator
+
+![Lumo Auto generate mode](scr/3.png)
+
+## How it works
+
+Lumo sends image-generation prompts to a ComfyUI workflow you provide. The language model helps interpret your request and prepare the prompt; ComfyUI runs the actual image-generation graph using the models and custom nodes installed on your system.
 
 ### Auto generate
 
-The original generator combines a prompt request with a selected preset and workflow.
-
-![Auto generate workspace](scr/3.png)
-
-## What it does
-
-- Connects to an OpenAI-compatible chat-completions endpoint to prepare image prompts.
-- Submits prompts to a ComfyUI server using an API-format workflow JSON file.
-- Offers two workflows: **Auto generate**, which uses presets, and **Conversation mode**, which works from the live conversation and current image context.
-- Supports text input and push-to-talk speech input. Speech is transcribed locally with faster-whisper.
-- Supports optional image-to-image editing in conversation mode when the selected workflow has compatible image input and switch nodes.
-- Keeps prompt history and generated files on the local machine, with optional Telegram notifications.
-- Can start, stop, and check a remote LLM service over SSH when that option is configured.
-
-## How generation works
-
-### Auto generate
-
-Auto generate is the original preset-based workflow. A preset can provide a base prompt, style, type, reference prompt, and additional instructions. The language model expands the user's request into an image prompt. The agent checks the prompt length and may ask the model for another variation before sending it to ComfyUI.
+Choose a preset and workflow, describe the image, and generate. Presets can supply optional style and prompt guidance. The generated image and prompt are shown in the app and can be saved locally.
 
 ```mermaid
 flowchart LR
-    A[User request] --> B[Selected preset]
+    A[Your request] --> B[Preset and workflow]
     B --> C[OpenAI-compatible LLM]
-    C --> D{Prompt meets minimum length?}
-    D -- No --> C
-    D -- Yes --> E[ComfyUI API workflow]
-    E --> F[Generated image]
-    F --> G[Local preview and history]
-    F -. optional .-> H[Telegram delivery]
+    C --> D[ComfyUI]
+    D --> E[Image preview and local history]
 ```
 
 ### Conversation mode
 
-Conversation mode does not load prompt presets. The agent uses the conversation to decide whether to reply, create an image, edit the current image, or start a new image. It prepares a prompt for the Krea2 image workflow selected in ComfyUI. Follow-up requests can adjust the current image while preserving relevant scene details.
+Start with a new image idea, then make changes in the same conversation. Lumo keeps the current prompt and image session as context. If your selected workflow supports image-to-image input, Lumo can also pass the previous result into the next generation. Use **Start over** to clear the image context and begin a fresh conversation.
 
 ```mermaid
 flowchart TD
-    A[Typed request or speech] --> B[Speech transcription, when using a microphone]
-    B --> C[Normalize obvious transcription errors and classify intent]
-    C --> D{Chat or image action?}
-    D -- Chat --> E[LLM reply]
-    D -- New image --> F[Clear previous image context]
-    D -- Create or edit --> G[Use conversation and current prompt]
-    F --> H[Build Krea2 prompt]
-    G --> H
-    H --> I[Selected ComfyUI workflow]
-    I --> J[Show result and retain session context]
-    J -. optional img2img .-> I
+    A[Type or speak] --> B[Conversation context]
+    B --> C{Respond, create, or refine?}
+    C -->|Respond| D[LLM reply]
+    C -->|Create or refine| E[Prepare image prompt]
+    E --> F[Selected ComfyUI workflow]
+    F --> G[Show result and retain session]
+    G -. optional img2img .-> F
 ```
 
-Speech recognition shows a live transcript in the side panel. The agent may correct an obvious recognition or grammar error before acting; if a phrase is genuinely ambiguous, it is instructed not to guess. The side panel shows the current task and completed prompt as progress information, not private model reasoning.
-
-The speech model is downloaded the first time it is initialized and then runs locally. The current transcription configuration is optimized for Polish speech. Text input remains available regardless of microphone setup.
+Voice transcription runs locally. The speech model may download on first use; after that, it runs on your computer. Text input is available even if microphone support is not set up.
 
 ## Requirements
 
-- Windows 10/11 or a recent Linux desktop environment
+- Windows 10/11 or Linux with a desktop environment
 - Python 3.10 or newer
-- ComfyUI running and reachable over HTTP
-- An OpenAI-compatible `/v1/chat/completions` endpoint, for example LM Studio or another compatible local or hosted service
-- A ComfyUI workflow exported in **API format** (`Save (API Format)`)
-- For voice input: a working microphone and audio input support for `sounddevice`
+- A running [ComfyUI](https://github.com/comfyanonymous/ComfyUI) server
+- An OpenAI-compatible `/v1/chat/completions` endpoint, such as LM Studio or a compatible hosted service
+- A ComfyUI workflow exported with **Save (API Format)**
+- Optional voice input: a working microphone and audio support for `sounddevice`
 
-The ComfyUI installation must have the models and custom nodes required by the chosen workflow. This clean distribution does not include machine-specific workflow exports; use an API-format workflow from your own ComfyUI installation.
+Install any models and custom nodes required by your workflow in ComfyUI. Lumo does not bundle ComfyUI, model weights, custom nodes, or machine-specific workflow exports.
 
-## Install and run
+## Install and launch
 
 ### Windows
 
-1. Install Python 3.10 or newer and make sure the Python launcher (`py`) is available.
-2. Start ComfyUI and the LLM endpoint you plan to use.
-3. Run `run_windows.bat` from the project folder. It creates `.venv` if needed, installs `requirements.txt`, and launches the app.
-4. On first launch, open **Settings** and configure the LLM and ComfyUI connections. Save the settings.
-5. Choose **Auto generate** or **Conversation mode** from the home screen.
-
-The speech model may download the first time you use speech recognition. Allow network access for this initial download.
+1. Install Python 3.10 or newer and ensure the `py` launcher is available.
+2. Start ComfyUI and your chosen LLM server.
+3. Run `run_windows.bat` from the Lumo folder. It creates a virtual environment, installs Python dependencies, and launches the app.
+4. Open **Settings**, enter your LLM and ComfyUI connection details, and save.
+5. Select **Auto generate** or **Conversation mode**.
 
 ### Linux
 
-1. Install Python 3.10 or newer and the system packages needed by PySide6 and `sounddevice` on your distribution.
-2. Start ComfyUI and the LLM endpoint.
-3. From the project folder, run `chmod +x run_linux.sh` if needed, then `./run_linux.sh`.
-4. Configure the connections from **Settings** and save.
+1. Install Python 3.10 or newer and the system dependencies needed by PySide6 and `sounddevice`.
+2. Start ComfyUI and your chosen LLM server.
+3. In a terminal, run `chmod +x run_linux.sh` if needed, then `./run_linux.sh` from the Lumo folder.
+4. Configure the connections in **Settings**.
 
-### Manual setup
+### Manual installation
 
 ```bash
 python -m venv .venv
@@ -116,83 +103,73 @@ python -m pip install -r requirements.txt
 python main.py
 ```
 
-## First-time configuration
+## Connect your services
 
-Open **Settings** from the top bar. The app loads `config.json` if it exists; otherwise it uses safe defaults. You can copy `config.json.example` to `config.json` and edit it, or enter your connections in the Settings page and select **Save settings**. `config.json` is excluded from Git.
+On first launch, Lumo starts with safe defaults. Configure connections from **Settings** and select **Save settings**. Settings are stored locally in `config.json`, which is excluded from Git. You can also copy `config.json.example` to `config.json` and edit it before launch.
 
 ### Language model
 
-- **API address**: the base URL for the compatible endpoint, usually ending in `/v1`.
-- **API key**: optional for local servers; required by some hosted endpoints.
-- **Model**: a model ID available from the configured server.
-- **Timeout and generation parameters**: tune request duration and sampling behavior.
+Enter the base URL for your OpenAI-compatible service (typically ending in `/v1`), an API key if required, and a model ID available from that service. Local endpoints commonly do not require an API key.
 
 ### ComfyUI
 
-Set the ComfyUI server address, generation timeout, and output folder. The output folder should match a directory or path that the app can access for generated files.
+Enter the ComfyUI server URL, generation timeout, and—if needed—the output directory visible to Lumo. The workflow must be available through the ComfyUI API and use nodes and models installed on that server.
 
-### Optional SSH lifecycle control
+### Optional integrations
 
-Enable **Manage server over SSH** to let the app run configured start, stop, and status commands for a remote LLM server. Configure the host, port, username, and either an OpenSSH key path or a password. Host verification uses the machine's `known_hosts` file; add and verify the remote host there before connecting.
+- **SSH lifecycle control** can run configured start, stop, and status commands for a remote LLM service. Supply the host, port, user, and a key path or password in Settings.
+- **Telegram** can send generation results and receive agent commands. Add the bot token and chat ID in Settings. Keep bot credentials private.
 
-### Optional Telegram
-
-Telegram integration can send generation notifications and results and accept agent commands. Configure the bot token and chat ID in Settings. Keep the token private. Result delivery can be enabled separately from bot command handling.
-
-## Using the two modes
+## Use Lumo
 
 ### Auto generate
 
-1. Select a preset from the right-hand panel.
-2. Select a ComfyUI API workflow.
-3. Enter what you want to generate and choose **Generate / Start**.
-4. Review the result and prompt history. Use **Archive prompts** to create a ZIP archive of saved prompts.
+1. Select a preset and a ComfyUI API workflow.
+2. Describe the image and choose **Generate / Start**.
+3. Review the image and prompt history. Use **Archive prompts** to download saved prompts as a ZIP file.
 
-Neutral starter presets live in `presets/`. Choose a workflow exported from your ComfyUI installation. Before generating, replace `__SET_POSITIVE_PROMPT_NODE_ID__` in the selected preset JSON with the positive text-prompt node ID from that workflow. The preset's advanced prompt fields are intended for optional, project-specific guidance.
+The starter presets in `presets/` are neutral examples. For each preset, set `prompt_node_id` to the positive text-prompt node ID in your own workflow JSON.
 
 ### Conversation mode
 
-1. Select the chat model and a ComfyUI API workflow in the side panel.
-2. Type a request in the input at the bottom, or select **Speak** and talk into the microphone.
-3. Review the result in the large preview. Ask for a follow-up change to continue the same image session.
-4. Use **Start over** when you want a new image concept and cleared LLM context.
+1. Select an LLM model and ComfyUI workflow in the side panel.
+2. Type a request, or choose **Speak** and talk into your microphone.
+3. Review the generated image and request further changes in the same session.
+4. Choose **Start over** to start a new image concept and clear the conversation context.
 
-The agent retains the current prompt and conversation context for follow-up edits. Image-to-image input is optional. If enabled, the app uploads the previous result to ComfyUI and uses it as the input image on the next edit. This requires a compatible `LoadImage` node and workflow switch. Without img2img, the agent still uses the current prompt and conversation to maintain scene continuity.
+Image-to-image editing is optional and depends on the chosen workflow. When supported and enabled, Lumo uploads the previous result to ComfyUI for the next edit. Otherwise, the current conversation and prompt still provide context for follow-up requests.
 
-The small red **Cancel all** control in the top bar stops active recording, speech output, LLM requests, image generation, and a managed remote LLM service where possible.
+The red **Cancel all** control stops active recording, speech playback, LLM requests, image generation, and a managed remote LLM service where possible.
 
 ## Workflows
 
-Place your ComfyUI API workflow exports in `workflows/` or select them from another location. In conversation mode, optional advanced controls let you specify node IDs for the prompt, image input, and switch. Automatic node detection is used when the workflow is unambiguous.
+Export workflows from ComfyUI using **Save (API Format)**. Place them in `workflows/` or select them from another location in the app. The `workflows/` folder intentionally contains no machine-specific exports.
 
-Install the models and custom nodes required by your workflow in ComfyUI and verify the workflow there before using it with the agent.
+Auto generate presets need the positive prompt node ID. Conversation mode can detect a clearly labeled positive prompt node; if detection is ambiguous, specify the node ID in workflow options. Image-to-image workflows also need compatible image-input and switch nodes.
 
-## Project layout
+Test your workflow in ComfyUI first and install its required models and custom nodes before selecting it in Lumo.
+
+## Privacy and local data
+
+Lumo stores connection settings in `config.json`; this may include API keys, Telegram credentials, and SSH details. Do not share this file or commit it to Git. Local prompt history and generated images can also contain private information. Review them before sharing project files or screenshots.
+
+The repository's `.gitignore` excludes local configuration, runtime history, generated images, virtual environments, and credentials. Workflow exports are intentionally left for you to add from your own ComfyUI setup.
+
+## Project structure
 
 ```text
-agent/       LLM, ComfyUI, SSH lifecycle, Telegram, state, and generation logic
-gui/         Launcher, auto generator, conversation UI, settings, translations, and visuals
-presets/     Preset definitions used by Auto generate
-workflows/   ComfyUI API workflow JSON files
-prompts/     Locally saved generated prompts
-generated/   Generated images (runtime output)
-scr/         Screenshots embedded in this README
-config.json.example  Safe starter configuration; copy to config.json and add local settings
-config.json  Local connection settings and credentials (ignored by Git)
-state.json   Local generation history/state (ignored by Git)
-input.json  Runtime request data created by Auto generate (ignored by Git)
+agent/       LLM, ComfyUI, SSH lifecycle, Telegram, and generation logic
+gui/         Launcher, generator, conversation view, settings, and translations
+presets/     Preset definitions for Auto generate
+workflows/   Add your own ComfyUI API workflow exports here
+scr/         Screenshots used in this README
 main.py      Application entry point
+config.json.example  Safe example configuration
 ```
-
-## Data and security
-
-`config.json` can contain LLM API keys, Telegram credentials, and SSH connection details. Do not commit it or paste credentials into issues, screenshots, or logs. The `.gitignore` excludes configuration, input/state files, virtual environments, Python caches, generated images, prompt history, and archives. Keep private workflow exports and runtime data out of commits.
-
-Generated images and prompt records are local project data. Decide which examples, if any, you want to publish before adding runtime output to Git.
 
 ## Notes
 
-- The interface language preference is stored under `ui.language` in `config.json` (`en` or `pl`). English is used when no preference is set.
-- Auto generate uses neutral starter presets; Conversation mode is preset-free and builds image prompts for the selected Krea2-oriented workflow.
-- ComfyUI, its model files, and any remote LLM service are external dependencies and are not installed by this project.
-- No license is currently included. Add a license file before describing the project as open source or accepting contributions under specific terms.
+- The interface language defaults to English; Polish is also available.
+- ComfyUI, its model files and custom nodes, and any LLM endpoint are separate dependencies.
+- The speech model is downloaded on first use and runs locally afterward.
+- No license file is currently included. Add a license before describing Lumo as open source or accepting contributions under specific terms.
